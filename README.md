@@ -11,10 +11,6 @@ import (
 )
 
 func main() {
-    if err:=defineDummyValues();err!=nil{
-        log.Fatal(err)
-    }
-    
     /* Examples */
     
     // SetString sets the value of the environment variable named by the key.
