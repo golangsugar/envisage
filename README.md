@@ -45,13 +45,14 @@ func main() {
 
 	const (
 		key          = "DB_CONNECTION_STRING"
-		defaultValue = "-"  // defaultValue returned if the value is not present/set in the environment
-		twoWay       = true // twoWay updates the environment with the defaultValue, in case of the environment variable is not present/set
-		mandatory    = true // mandatory forces and error in case of the variable is absent in the environment
+		defaultValue = "-"   // defaultValue returned if the value is not present/set in the environment
+		twoWay       = true  // twoWay updates the environment with the defaultValue, in case of the environment variable is not present/set
+		mandatory    = true  // mandatory forces and error in case of the variable is absent in the environment
+		canBeEmpty   = false // Empty is an acceptable value if true
 	)
 
 	// Check Test environment variables according given directives
-	if err := envisage.Check(key, defaultValue, twoWay, mandatory); err != nil {
+	if err := envisage.Check(key, defaultValue, twoWay, mandatory, canBeEmpty); err != nil {
 		log.Fatal(err)
 	}
 

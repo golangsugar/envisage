@@ -27,8 +27,8 @@ func createLoadFromFileTestCases() []fileTestCase {
 			v:       "COMMENT",
 			isThere: false,
 		}, {
-			row:     " STARTWITH=SPACE",
-			k:       "STARTWITH",
+			row:     " STARTWITH=space",
+			k:       " STARTWITH",
 			v:       "space",
 			isThere: false,
 		}, {
@@ -69,7 +69,7 @@ func createFile(tests []fileTestCase) error {
 	defer func() { _ = f.Close() }()
 
 	for _, x := range tests {
-		if _, werr := f.WriteString(x.row); werr != nil {
+		if _, werr := f.WriteString(x.row + "\n"); werr != nil {
 			return werr
 		}
 	}
@@ -83,6 +83,10 @@ func TestLoadFromFile(t *testing.T) {
 	if err := createFile(tests); err != nil {
 		t.Fatal(err)
 	}
+
+	defer func() {
+		_ = os.Remove(fileName)
+	}()
 
 	const (
 		updateEnvironment = true

@@ -1,151 +1,570 @@
+// Package envisage is a lightweight package that makes easier and safer to deal with environment variables.
 package envisage
 
-//
-//func TestEnvCheck(t *testing.T) {
-//	type test struct {
-//		title        string
-//		defaultValue string
-//		define       string
-//		mandatory    bool
-//		debugLog     bool
-//		assertion    error
-//	}
-//
-//	tests := []test{
-//		{"ENVALRIGHT", "X", "xyz", true, false, nil},
-//		{"ENVDOESNTEXIST", "X", "", false, true, nil},
-//		{"ENVEMPTYOPTIONAL", "", "xyz", false, true, nil},
-//		{"ENVEMPTYMANDATORY", "", "", true, true, fmt.Errorf(`required environment variable "%s" isn't set`, "ENVEMPTYMANDATORY")},
-//		{"ENVMANDATORYWITHDEFAULT", "xyz", " ", true, true, nil},
-//	}
-//
-//	for _, tx := range tests {
-//		if err := os.Setenv(tx.title, tx.define); err != nil {
-//			t.Fatal(err)
-//		}
-//
-//		if err := Check(tx.title, tx.defaultValue, tx.mandatory, tx.debugLog); err != tx.assertion {
-//			if err != nil && tx.assertion != nil && tx.assertion.Error() != err.Error() {
-//				t.Logf("expected value %v, got %v\n", tx.assertion, err)
-//				t.Fail()
-//			}
-//		}
-//	}
-//}
-//
-//func TestEnvStr(t *testing.T) {
-//	type test struct {
-//		envVar       string
-//		value        string
-//		defaultValue string
-//		assertion    string
-//	}
-//
-//	tests := []test{
-//		{"ENV_XYZ", "xyz", "", "xyz"},
-//		{"ENV_EMPTY", "", "", ""},
-//		{"ENV_EMPTYDEFAULT", "", "xyz", "xyz"},
-//	}
-//
-//	for _, tx := range tests {
-//		if err := os.Setenv(tx.envVar, tx.value); err != nil {
-//			t.Fatal(err)
-//		}
-//
-//		if v := AsString(tx.envVar, tx.defaultValue); v != tx.assertion {
-//			t.Logf("expected value %v, got %v\n", tx.assertion, v)
-//			t.Fail()
-//		}
-//	}
-//}
-//
-////func TestAsStringSlice(t *testing.T) {
-////	if os.Getenv(key) != `` {
-////		return strings.Split(os.Getenv(key), separator)
-////	}
-////
-////	if len(defaultValue) > 0 {
-////		return defaultValue
-////	}
-////
-////	return []string{}
-////}
-//
-//func TestEnvInt(t *testing.T) {
-//	type test struct {
-//		envVar       string
-//		value        string
-//		defaultValue int
-//		assertion    int
-//	}
-//
-//	tests := []test{
-//		{"ENV_111", "111", 0, 111},
-//		{"ENV_EMPTY", "", 0, 0},
-//		{"ENV_ZERO", "0", 0, 0},
-//		{"ENV_ZERODEFAULT", "", 0, 0},
-//		{"ENV_555", "", 555, 555},
-//	}
-//
-//	for _, tx := range tests {
-//		if err := os.Setenv(tx.envVar, tx.value); err != nil {
-//			t.Fatal(err)
-//		}
-//
-//		if v := AsInt(tx.envVar, tx.defaultValue); v != tx.assertion {
-//			t.Logf("expected value %v, got %v\n", tx.assertion, v)
-//			t.Fail()
-//		}
-//	}
-//}
+import (
+	"os"
+	"strconv"
+	"testing"
+)
 
-//func TestEnvInt64(t *testing.T) {
-//	if os.Getenv(key) != `` {
-//		if i, err := strconv.ParseInt(os.Getenv(key), 10, 64); err == nil {
-//			return i
-//		}
-//	}
-//
-//	return defaultValue
-//}
-//
-//func TestEnvIntS(t *testing.T) {
-//	if os.Getenv(key) != `` {
-//		a := strings.Split(os.Getenv(key), separator)
-//
-//		is := make([]int, len(a))
-//
-//		for i, x := range a {
-//			is[i], _ = strconv.Atoi(x)
-//		}
-//
-//		return is
-//	}
-//
-//	if len(defaultValue) > 0 {
-//		return defaultValue
-//	}
-//
-//	return []int{}
-//}
-//
-//func TestEnvFloat64(t *testing.T) {
-//	if os.Getenv(key) != `` {
-//		if f, err := strconv.ParseFloat(os.Getenv(key), 64); err == nil {
-//			return f
-//		}
-//	}
-//
-//	return defaultValue
-//}
-//
-//func TestEnvBool(t *testing.T) {
-//	if os.Getenv(key) != `` {
-//		if b, err := strconv.ParseBool(os.Getenv(key)); err == nil {
-//			return b
-//		}
-//	}
-//
-//	return defaultValue
-//}
-//
+func TestSetString(t *testing.T) {
+	type testCase struct {
+		title,
+		key,
+		value string
+	}
+
+	tests := []testCase{
+		{
+			title: "simple test",
+			key:   "SIMPLE_TEST",
+			value: "SIMPLE_VALUE",
+		},
+		{
+			title: "string with spaces",
+			key:   "WITH_SPACE",
+			value: "string with spaces",
+		},
+		{
+			title: "empty string",
+			key:   "EMPTY_STRING",
+			value: "",
+		},
+	}
+
+	for _, x := range tests {
+		t.Run(x.title, func(t *testing.T) {
+			if err := SetString(x.key, x.value); err != nil {
+				t.Error(err)
+			}
+
+			if got := os.Getenv(x.key); got != x.value {
+				t.Errorf("failed. expecting %s, got %s", x.value, got)
+			}
+		})
+	}
+}
+
+func TestSetInt(t *testing.T) {
+	type testCase struct {
+		title,
+		key string
+		value int
+	}
+
+	tests := []testCase{
+		{
+			title: "simple test",
+			key:   "SIMPLE_TEST",
+			value: 0,
+		},
+		{
+			title: "big value",
+			key:   "BIG_VALUE",
+			value: 545545464564156,
+		},
+		{
+			title: "negative value",
+			key:   "NEGATIVE_VALUE",
+			value: -987654,
+		},
+	}
+
+	for _, x := range tests {
+		t.Run(x.title, func(t *testing.T) {
+			if err := SetInt(x.key, x.value); err != nil {
+				t.Error(err)
+			}
+
+			got := os.Getenv(x.key)
+
+			if i, _ := strconv.Atoi(got); i != x.value {
+				t.Errorf("failed. expecting %d, got %d", x.value, i)
+			}
+		})
+	}
+}
+
+func TestSetI64(t *testing.T) {
+	type testCase struct {
+		title,
+		key string
+		value int64
+	}
+
+	tests := []testCase{
+		{
+			title: "simple test",
+			key:   "SIMPLE_TEST",
+			value: 0,
+		},
+		{
+			title: "big value",
+			key:   "BIG_VALUE",
+			value: 545545464564145454,
+		},
+		{
+			title: "negative value",
+			key:   "NEGATIVE_VALUE",
+			value: -54554546456545454,
+		},
+	}
+
+	for _, x := range tests {
+		t.Run(x.title, func(t *testing.T) {
+			if err := SetI64(x.key, x.value); err != nil {
+				t.Error(err)
+			}
+
+			got := os.Getenv(x.key)
+
+			if i, _ := strconv.ParseInt(got, 10, 64); i != x.value {
+				t.Errorf("failed. expecting %d, got %d", x.value, i)
+			}
+		})
+	}
+}
+
+func TestSetF64(t *testing.T) {
+	type testCase struct {
+		title,
+		key string
+		value float64
+	}
+
+	tests := []testCase{
+		{
+			title: "zeroed value",
+			key:   "SIMPLE_TEST",
+			value: .0,
+		},
+		{
+			title: "simple test",
+			key:   "SIMPLE_TEST",
+			value: 98765.4321,
+		},
+		{
+			title: "big value",
+			key:   "BIG_VALUE",
+			value: 545545464564156545454.9797879879879879879,
+		},
+		{
+			title: "negative value",
+			key:   "NEGATIVE_VALUE",
+			value: -545545464564156545454.6546546565465464454616161654,
+		},
+	}
+
+	for _, x := range tests {
+		t.Run(x.title, func(t *testing.T) {
+			if err := SetF64(x.key, x.value); err != nil {
+				t.Error(err)
+			}
+
+			got := os.Getenv(x.key)
+
+			if i, _ := strconv.ParseFloat(got, 64); i != x.value {
+				t.Errorf("failed. expecting %f, got %f", x.value, i)
+			}
+		})
+	}
+}
+
+func TestSetBool(t *testing.T) {
+	type testCase struct {
+		title,
+		key string
+		value bool
+	}
+
+	tests := []testCase{
+		{
+			title: "false value",
+			key:   "FALSE_VALUE",
+			value: false,
+		},
+		{
+			title: "true value",
+			key:   "TRUE_VALUE",
+			value: true,
+		},
+	}
+
+	for _, x := range tests {
+		t.Run(x.title, func(t *testing.T) {
+			if err := SetBool(x.key, x.value); err != nil {
+				t.Error(err)
+			}
+
+			got := os.Getenv(x.key)
+
+			if i, _ := strconv.ParseBool(got); i != x.value {
+				t.Errorf("failed. expecting %t, got %t", x.value, i)
+			}
+		})
+	}
+}
+
+func TestIsThere(t *testing.T) {
+	type testCase struct {
+		title,
+		key,
+		value string
+	}
+
+	tests := []testCase{
+		{
+			title: "envisage simple test",
+			key:   "ENVISAGE_SIMPLE_TEST",
+			value: "AAAAAAAAAAAAAAA",
+		},
+		{
+			title: "envisage test with empty string",
+			key:   "ENVISAGE_TEST_WITH_EMPTY_STRING",
+			value: "",
+		},
+		{
+			title: "envisage lowercase test",
+			key:   "envisage_lower_case_test",
+			value: "fjdlhfkjdhfjkahkjdsfkljasdhsaklkd",
+		},
+		{
+			title: "envisage mixed case test",
+			key:   "envisage_MixedCaseTest",
+			value: "blablablah",
+		},
+	}
+
+	for _, x := range tests {
+		t.Run(x.title, func(t *testing.T) {
+			if err := SetString(x.key, x.value); err != nil {
+				t.Error(err)
+			}
+
+			if !IsThere(x.key) {
+				t.Errorf("failed. %s variable isnt' there", x.title)
+			}
+		})
+	}
+}
+
+func TestString(t *testing.T) {
+	type testCase struct {
+		title,
+		key,
+		value,
+		defaultValue string
+	}
+
+	tests := []testCase{
+		{
+			title: "envisage simple test",
+			key:   "ENVISAGE_SIMPLE_TEST",
+			value: "AAAAAAAAAAAAAAA",
+		},
+		{
+			title: "envisage test with empty string",
+			key:   "ENVISAGE_TEST_WITH_EMPTY_STRING",
+			value: "",
+		},
+		{
+			title: "envisage testing string with spaces",
+			key:   "ENVISAGE_TESTING_STRING_WITH_SPACES",
+			value: "word 1, word 2 and word 3",
+		},
+		{
+			title: "envisage mixed case test",
+			key:   "envisage_MixedCaseTest",
+			value: "blablablah",
+		},
+		{
+			title:        "envisage testing default value",
+			key:          "ENVISAGE_TESTING_DEFAULT_VALUE",
+			value:        "blablablah",
+			defaultValue: "blablablah",
+		},
+	}
+
+	for _, x := range tests {
+		t.Run(x.title, func(t *testing.T) {
+			if x.defaultValue == "" {
+				if err := SetString(x.key, x.value); err != nil {
+					t.Error(err)
+				}
+			}
+
+			if got := String(x.key, x.defaultValue); got != x.value {
+				t.Errorf("failed %s. expecting %s, got %s", x.title, x.value, got)
+			}
+		})
+	}
+}
+
+func TestInt(t *testing.T) {
+	type testCase struct {
+		title,
+		key string
+		value,
+		defaultValue int
+	}
+
+	tests := []testCase{
+		{
+			title: "envisage simple test",
+			key:   "TEST_INT_SIMPLE_TEST",
+			value: 987654321,
+		},
+		{
+			title: "zeroed value",
+			key:   "TEST_INT_ZEROED_VALUE",
+			value: 0,
+		},
+		{
+			title: "negative value",
+			key:   "TEST_INT_NEGATIVE_VALUE",
+			value: -987654321,
+		},
+		{
+			title:        "default value",
+			key:          "TEST_INT_DEFAULT_VALUE",
+			value:        123456789,
+			defaultValue: 123456789,
+		},
+	}
+
+	for _, x := range tests {
+		t.Run(x.title, func(t *testing.T) {
+			if x.defaultValue == 0 {
+				if err := SetInt(x.key, x.value); err != nil {
+					t.Error(err)
+				}
+			}
+
+			if got := Int(x.key, x.defaultValue); got != x.value {
+				t.Errorf("failed %s. expecting %d, got %d", x.title, x.value, got)
+			}
+		})
+	}
+}
+
+func TestI64(t *testing.T) {
+	type testCase struct {
+		title,
+		key string
+		value,
+		defaultValue int64
+	}
+
+	tests := []testCase{
+		{
+			title: "envisage simple test",
+			key:   "TEST_I64_SIMPLE_TEST",
+			value: 9876543210123,
+		},
+		{
+			title: "zeroed value",
+			key:   "TEST_I64_ZEROED_VALUE",
+			value: 0,
+		},
+		{
+			title: "negative value",
+			key:   "TEST_I64_NEGATIVE_VALUE",
+			value: -9876543210123,
+		},
+		{
+			title:        "default value",
+			key:          "TEST_I64_DEFAULT_VALUE",
+			value:        123456789,
+			defaultValue: 123456789,
+		},
+	}
+
+	for _, x := range tests {
+		t.Run(x.title, func(t *testing.T) {
+			if x.defaultValue == 0 {
+				if err := SetI64(x.key, x.value); err != nil {
+					t.Error(err)
+				}
+			}
+
+			if got := I64(x.key, x.defaultValue); got != x.value {
+				t.Errorf("failed %s. expecting %d, got %d", x.title, x.value, got)
+			}
+		})
+	}
+}
+
+/*
+func TestCheck(t*testing.T){
+	type testCase struct {
+		title,
+		key,
+		expected,
+		twoWay string
+		mandatory,
+		canBeEmpty bool
+	}
+
+	tests := []testCase{
+		{
+			title:      "",
+			key:        "",
+			expected:   "",
+			twoWay:     "",
+			mandatory:  false,
+			canBeEmpty: false,
+		},
+		{
+			title:      "",
+			key:        "",
+			expected:   "",
+			twoWay:     "",
+			mandatory:  false,
+			canBeEmpty: false,
+		},
+		{
+			title:      "",
+			key:        "",
+			expected:   "",
+			twoWay:     "",
+			mandatory:  false,
+			canBeEmpty: false,
+		},
+		{
+			title:      "",
+			key:        "",
+			expected:   "",
+			twoWay:     "",
+			mandatory:  false,
+			canBeEmpty: false,
+		},
+		{
+			title:      "",
+			key:        "",
+			expected:   "",
+			twoWay:     "",
+			mandatory:  false,
+			canBeEmpty: false,
+		},
+		{
+			title:      "",
+			key:        "",
+			expected:   "",
+			twoWay:     "",
+			mandatory:  false,
+			canBeEmpty: false,
+		},
+	}
+
+	key, defaultValue
+} string, twoWay, mandatory, canBeEmpty bool) error {
+	s, ok := os.LookupEnv(key)
+	if !ok {
+		if mandatory {
+			return fmt.Errorf("missing mandatory environment variable %s", key)
+		}
+
+		if defaultValue != "" {
+			s = defaultValue
+		}
+
+		if twoWay {
+			if err := os.Setenv(key, s); err != nil {
+				return err
+			}
+		}
+	}
+
+	if s == "" && !canBeEmpty {
+		return fmt.Errorf("environment variable %s can't be empty", key)
+	}
+
+	return nil
+}
+
+// Bool returns the env var value as boolean
+func Bool(key string, defaultValue bool) bool {
+	if s, ok := os.LookupEnv(key); ok {
+		if b, err := strconv.ParseBool(s); err == nil {
+			return b
+		}
+	}
+
+	return defaultValue
+}
+
+// F64 returns the env var value as float64
+func F64(key string, commaDecimalSeparator bool, defaultValue float64) float64 {
+	if s, ok := os.LookupEnv(key); ok {
+		if commaDecimalSeparator {
+			s = strings.Replace(s, ",", ".", 1)
+		}
+
+		if f, err := strconv.ParseFloat(s, 64); err == nil {
+			return f
+		}
+	}
+
+	return defaultValue
+}
+
+// StringS returns the env var value as []string
+func StringS(key, separator string, defaultValue []string) []string {
+	if s, ok := os.LookupEnv(key); ok {
+		return strings.Split(s, separator)
+	}
+
+	return defaultValue
+}
+
+// IntS returns the env var value as []int
+func IntS(key, listItemSeparator string, defaultValue []int) ([]int, error) {
+	if s, ok := os.LookupEnv(key); ok {
+		ss := strings.Split(s, listItemSeparator)
+
+		if len(ss) > 0 {
+			var a []int
+
+			for _, x := range ss {
+				if i, err := strconv.Atoi(x); err != nil {
+					return defaultValue, err
+				} else {
+					a = append(a, i)
+				}
+			}
+
+			return a, nil
+		}
+	}
+
+	return defaultValue, nil
+}
+
+// F64S returns the env var value as []float64
+func F64S(key, listItemSeparator string, commaDecimalSeparator bool, defaultValue []float64) ([]float64, error) {
+	if s, ok := os.LookupEnv(key); ok {
+		ss := strings.Split(s, listItemSeparator)
+
+		if len(ss) > 0 {
+			var a []float64
+
+			for _, x := range ss {
+				if commaDecimalSeparator {
+					x = strings.Replace(x, ",", ".", 1)
+				}
+
+				if f, err := strconv.ParseFloat(x, 64); err != nil {
+					return a, err
+				} else {
+					a = append(a, f)
+				}
+			}
+
+			return a, nil
+		}
+	}
+
+	return defaultValue, nil
+}
+
+*/

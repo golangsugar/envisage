@@ -8,13 +8,13 @@ import (
 	"strings"
 )
 
-// Check Test environment variables according given directives
-// defaultValue returned if the value is not present/set in the environment
-// twoWay updates the environment with the defaultValue, in case of the environment variable is not present/set
-// mandatory forces and error in case of the variable is absent in the environment
-func Check(key, defaultValue string, twoWay, mandatory bool) error {
+// Check Test environment variables according given directives.
+// defaultValue returned if the value is not present/set in the environment.
+// twoWay updates the environment with the defaultValue, in case of the environment variable is not present/set.
+// mandatory forces and error in case of the variable is absent in the environment. empty is acceptable.
+// canBeEmpty forces an error if the variable has empty value.
+func Check(key, defaultValue string, twoWay, mandatory, canBeEmpty bool) error {
 	s, ok := os.LookupEnv(key)
-
 	if !ok {
 		if mandatory {
 			return fmt.Errorf("missing mandatory environment variable %s", key)
@@ -22,13 +22,17 @@ func Check(key, defaultValue string, twoWay, mandatory bool) error {
 
 		if defaultValue != "" {
 			s = defaultValue
+		}
 
-			if twoWay {
-				if err := os.Setenv(key, s); err != nil {
-					return err
-				}
+		if twoWay {
+			if err := os.Setenv(key, s); err != nil {
+				return err
 			}
 		}
+	}
+
+	if s == "" && !canBeEmpty {
+		return fmt.Errorf("environment variable %s can't be empty", key)
 	}
 
 	return nil
