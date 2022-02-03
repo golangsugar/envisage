@@ -3,7 +3,9 @@ package envisage
 
 import (
 	"os"
+	"reflect"
 	"strconv"
+	"strings"
 	"testing"
 )
 
@@ -394,6 +396,157 @@ func TestI64(t *testing.T) {
 	}
 }
 
+func TestF64(t *testing.T) {
+	type testCase struct {
+		title,
+		key string
+		value,
+		defaultValue float64
+	}
+
+	tests := []testCase{
+		{
+			title: "envisage simple test",
+			key:   "TEST_I64_SIMPLE_TEST",
+			value: 9876543210123.987654321,
+		},
+		{
+			title: "zeroed value",
+			key:   "TEST_I64_ZEROED_VALUE",
+			value: .0,
+		},
+		{
+			title: "negative value",
+			key:   "TEST_I64_NEGATIVE_VALUE",
+			value: -9876543210123.987654321,
+		},
+		{
+			title:        "default value",
+			key:          "TEST_I64_DEFAULT_VALUE",
+			value:        12345.67890,
+			defaultValue: 12345.67890,
+		},
+	}
+
+	for _, x := range tests {
+		t.Run(x.title, func(t *testing.T) {
+			if x.defaultValue == 0 {
+				if err := SetF64(x.key, x.value); err != nil {
+					t.Error(err)
+				}
+			}
+
+			if got := F64(x.key, false, x.defaultValue); got != x.value {
+				t.Errorf("failed %s. expecting %f, got %f", x.title, x.value, got)
+			}
+		})
+	}
+}
+
+func TestBool(t *testing.T) {
+	type testCase struct {
+		title,
+		key string
+		value        bool
+		defaultValue *bool
+	}
+
+	tests := []testCase{
+		{
+			title: "testing true",
+			key:   "T_BOOL_TRUE",
+			value: true,
+		},
+		{
+			title: "testing false",
+			key:   "T_BOOL_FALSE",
+			value: false,
+		},
+		{
+			title:        "testing default value",
+			key:          "T_BOOL_DEFAULT_VALUE",
+			value:        true,
+			defaultValue: func() *bool { x := true; return &x }(),
+		},
+	}
+
+	for _, x := range tests {
+		t.Run(x.title, func(t *testing.T) {
+			if x.defaultValue == nil {
+				if err := SetBool(x.key, x.value); err != nil {
+					t.Error(err)
+				}
+			}
+
+			defaultValue := func() bool {
+				if x.defaultValue != nil {
+					return *x.defaultValue
+				}
+				return false
+			}()
+
+			if got := Bool(x.key, defaultValue); got != x.value {
+				t.Errorf("failed %s. expecting %t, got %t", x.title, x.value, got)
+			}
+		})
+	}
+}
+
+func TestStringS(t *testing.T) {
+	type testCase struct {
+		title,
+		key string
+		value        []string
+		defaultValue *[]string
+	}
+
+	tests := []testCase{
+		{
+			title: "simple test",
+			key:   "SIMPLE_TEST",
+			value: []string{"a", "abcde", "01235", "", "-"},
+		},
+		{
+			title: "empty slice",
+			key:   "T_STRINGS_EMPTY_SLICE",
+			value: []string{},
+		},
+		{
+			title:        "default value",
+			key:          "T_STRINGS_DEFAULT_VALUE",
+			value:        []string{"a", "abcde", "01235", "", "-"},
+			defaultValue: &[]string{"a", "abcde", "01235", "", "-"},
+		},
+	}
+
+	for _, x := range tests {
+		t.Run(x.title, func(t *testing.T) {
+			if x.defaultValue == nil {
+				v := ""
+
+				if len(x.value) > 0 {
+					v = strings.Join(x.value, ",")
+				}
+
+				if err := SetString(x.key, v); err != nil {
+					t.Error(err)
+				}
+			}
+
+			defaultValue := func() []string {
+				if x.defaultValue != nil {
+					return *x.defaultValue
+				}
+				return nil
+			}()
+
+			if got := StringS(x.key, ",", defaultValue); !reflect.DeepEqual(x.value, got) {
+				t.Errorf("failed. expecting %#v, got %#v", x.value, got)
+			}
+		})
+	}
+}
+
 /*
 func TestCheck(t*testing.T){
 	type testCase struct {
@@ -480,32 +633,6 @@ func TestCheck(t*testing.T){
 	}
 
 	return nil
-}
-
-// Bool returns the env var value as boolean
-func Bool(key string, defaultValue bool) bool {
-	if s, ok := os.LookupEnv(key); ok {
-		if b, err := strconv.ParseBool(s); err == nil {
-			return b
-		}
-	}
-
-	return defaultValue
-}
-
-// F64 returns the env var value as float64
-func F64(key string, commaDecimalSeparator bool, defaultValue float64) float64 {
-	if s, ok := os.LookupEnv(key); ok {
-		if commaDecimalSeparator {
-			s = strings.Replace(s, ",", ".", 1)
-		}
-
-		if f, err := strconv.ParseFloat(s, 64); err == nil {
-			return f
-		}
-	}
-
-	return defaultValue
 }
 
 // StringS returns the env var value as []string
