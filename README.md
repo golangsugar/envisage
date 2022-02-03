@@ -2,11 +2,11 @@
 ### A lightweight package that makes easier and safer to deal with environment variables.
 
 #### Example
-Try it on On GoPlay https://goplay.tools/snippet/gTAprrrEqpU
+Try it on GoPlay https://goplay.tools/snippet/gTAprrrEqpU
 
 --- 
 
-```lang=golang
+```go
 package main
 
 import (
