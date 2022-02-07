@@ -1,8 +1,9 @@
 # Envisage
 ### A lightweight package that makes easier and safer to deal with environment variables.
+[![Known Vulnerabilities](https://snyk.io/test/github/golangsugar/envisage/badge.svg)](https://snyk.io/test/github/golangsugar/envisage)
 
 #### Example
-Try it on GoPlay https://goplay.tools/snippet/gTAprrrEqpU
+Try it on [GoPlay](https://goplay.tools/snippet/XLaebfrrfoH)
 
 --- 
 
@@ -18,6 +19,20 @@ import (
 
 func main() {
 	/* Examples */
+
+	const (
+		updateEnvironment = true
+		skipIfAlreadyDefined = true
+		errorIfFileDoesntExist = true
+    )
+
+	// LoadFromFile loads environment variables values from a given text file in to a map[string]string.
+	cfgmap,cmerr:=envisage.LoadFromFile(".local.env", updateEnvironment, skipIfAlreadyDefined, errorIfFileDoesntExist)
+	if cmerr!=nil {
+		log.Println(cmerr)
+	}
+	
+	fmt.Println(cfgmap)
 
 	// SetString sets the value of the environment variable named by the key.
 	if err := envisage.SetString("DB_CONNECTION_STRING", "databasedriver://user:password@serverhost/db?options"); err != nil {
