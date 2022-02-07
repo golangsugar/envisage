@@ -1,6 +1,6 @@
 # Envisage
 ### A lightweight package that makes easier and safer to deal with environment variables.
-[![Known Vulnerabilities](https://snyk.io/test/github/golangsugar/envisage/badge.svg)](https://snyk.io/test/github/golangsugar/envisage)
+[![Go Report Card](https://goreportcard.com/badge/github.com/golangsugar/envisage)](https://goreportcard.com/report/github.com/golangsugar/envisage)
 
 #### Example
 Try it on [GoPlay](https://goplay.tools/snippet/XLaebfrrfoH)
