@@ -46,6 +46,12 @@ func I64(key string, defaultValue int64) int64 {
 	return defaultValue
 }
 
+// Int64 returns the env var value as int64
+// It's an idiomatic convenience alias for I64
+func Int64(key string, defaultValue int64) int64 {
+	return I64(key, defaultValue)
+}
+
 // Bool returns the env var value as boolean
 func Bool(key string, defaultValue bool) bool {
 	if s, ok := os.LookupEnv(key); ok {
@@ -70,6 +76,12 @@ func F64(key string, commaDecimalSeparator bool, defaultValue float64) float64 {
 	}
 
 	return defaultValue
+}
+
+// Float64 returns the env var value as float64
+// It's an idiomatic convenience alias for F64
+func Float64(key string, commaDecimalSeparator bool, defaultValue float64) float64 {
+	return F64(key, commaDecimalSeparator, defaultValue)
 }
 
 // StringS returns the env var value as []string
@@ -104,6 +116,12 @@ func IntS(key, listItemSeparator string, defaultValue []int) ([]int, error) {
 	return defaultValue, nil
 }
 
+// IntSlice returns the env var value as []int
+// It's an idiomatic convenience alias for IntS
+func IntSlice(key, listItemSeparator string, defaultValue []int) ([]int, error) {
+	return IntS(key, listItemSeparator, defaultValue)
+}
+
 // F64S returns the env var value as []float64
 func F64S(key, listItemSeparator string, commaDecimalSeparator bool, defaultValue []float64) ([]float64, error) {
 	if s, ok := os.LookupEnv(key); ok {
@@ -131,6 +149,12 @@ func F64S(key, listItemSeparator string, commaDecimalSeparator bool, defaultValu
 	return defaultValue, nil
 }
 
+// Float64Slice returns the env var value as []float64
+// It's an idiomatic convenience alias for F64S
+func Float64Slice(key, listItemSeparator string, commaDecimalSeparator bool, defaultValue []float64) ([]float64, error) {
+	return F64S(key, listItemSeparator, commaDecimalSeparator, defaultValue)
+}
+
 // SetString sets the value of the environment variable named by the key.
 func SetString(key, value string) error {
 	return os.Setenv(key, value)
@@ -146,10 +170,22 @@ func SetI64(key string, value int64) error {
 	return os.Setenv(key, strconv.FormatInt(value, 10))
 }
 
+// SetInt64 sets the value of the environment variable named by the key.
+// It's an idiomatic convenience alias for SetI64
+func SetInt64(key string, value int64) error {
+	return SetI64(key, value)
+}
+
 // SetF64 sets the value of the environment variable named by the key.
 func SetF64(key string, value float64) error {
 	// For implementation details please refer to https://stackoverflow.com/questions/19101419/formatfloat-convert-float-number-to-string/19101700#19101700
 	return os.Setenv(key, strconv.FormatFloat(value, 'f', -1, 64))
+}
+
+// SetFloat64 sets the value of the environment variable named by the key.
+// It's an idiomatic convenience alias for SetF64
+func SetFloat64(key string, value float64) error {
+	return SetF64(key, value)
 }
 
 // SetBool sets the value of the environment variable named by the key.
