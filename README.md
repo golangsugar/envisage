@@ -12,32 +12,36 @@ package main
 
 import (
 	"fmt"
-	"github.com/golangsugar/envisage"
 	"log"
 	"os"
+
+	"github.com/golangsugar/envisage"
 )
 
 func main() {
 	/* Examples */
 
 	const (
-		updateEnvironment = true
-		skipIfAlreadyDefined = true
+		updateEnvironment      = true
+		skipIfAlreadyDefined   = true
 		errorIfFileDoesntExist = true
-    )
+	)
 
 	// LoadFromFile loads environment variables values from a given text file in to a map[string]string.
-	cfgmap,cmerr:=envisage.LoadFromFile(".local.env", updateEnvironment, skipIfAlreadyDefined, errorIfFileDoesntExist)
-	if cmerr!=nil {
+	cfgmap, cmerr := envisage.LoadFromFile(".local.env", updateEnvironment, skipIfAlreadyDefined, errorIfFileDoesntExist)
+	if cmerr != nil {
 		log.Println(cmerr)
 	}
-	
+
 	fmt.Println(cfgmap)
 
 	// SetString sets the value of the environment variable named by the key.
 	if err := envisage.SetString("DB_CONNECTION_STRING", "databasedriver://user:password@serverhost/db?options"); err != nil {
 		log.Fatal(err)
 	}
+
+	// Get returns the env var value as string, or empty if the variable is not present
+	fmt.Println(envisage.Get("DB_CONNECTION_STRING"))
 
 	// SetInt sets the value of the environment variable named by the key.
 	if err := envisage.SetInt("WEBSERVICE_PORT", 154); err != nil {
@@ -93,5 +97,6 @@ func main() {
 	fmt.Println(envisage.IntS("ARRAY_OF_INTEGERS", ",", nil))
 	// Print []int{45,8,22,5,4,4,666,4,9}
 }
+
 ```
 
