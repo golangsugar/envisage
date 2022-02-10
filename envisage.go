@@ -15,7 +15,18 @@ func IsThere(key string) bool {
 	return ok
 }
 
+// Get returns the env var value as string
+func Get(key string, defaultValue string) string {
+	if s, ok := os.LookupEnv(key); ok {
+		return s
+	}
+
+	return defaultValue
+}
+
 // String returns the env var value as string
+// It returns the default value only if the variable is not present.
+// If the variable is present, but not valued, empty will be returned
 func String(key string, defaultValue string) string {
 	if s, ok := os.LookupEnv(key); ok {
 		return s
@@ -25,6 +36,7 @@ func String(key string, defaultValue string) string {
 }
 
 // Int returns the env var value as int
+// It returns the default value only if either the variable is not present or if its value cannot be correctly converted for int
 func Int(key string, defaultValue int) int {
 	if s, ok := os.LookupEnv(key); ok {
 		if i, err := strconv.Atoi(s); err == nil {
@@ -36,6 +48,7 @@ func Int(key string, defaultValue int) int {
 }
 
 // I64 returns the env var value as int64
+// It returns the default value only if either the variable is not present or if its value cannot be correctly converted for int64
 func I64(key string, defaultValue int64) int64 {
 	if s, ok := os.LookupEnv(key); ok {
 		if i, err := strconv.ParseInt(s, 10, 64); err == nil {
@@ -47,12 +60,14 @@ func I64(key string, defaultValue int64) int64 {
 }
 
 // Int64 returns the env var value as int64
+// It returns the default value only if either the variable is not present or if its value cannot be correctly converted for int64
 // It's an idiomatic convenience alias for I64
 func Int64(key string, defaultValue int64) int64 {
 	return I64(key, defaultValue)
 }
 
 // Bool returns the env var value as boolean
+// It returns the default value only if either the variable is not present or if its value cannot be correctly converted for bool
 func Bool(key string, defaultValue bool) bool {
 	if s, ok := os.LookupEnv(key); ok {
 		if b, err := strconv.ParseBool(s); err == nil {
@@ -64,6 +79,7 @@ func Bool(key string, defaultValue bool) bool {
 }
 
 // F64 returns the env var value as float64
+// It returns the default value only if either the variable is not present or if its value cannot be correctly converted for float64
 func F64(key string, commaDecimalSeparator bool, defaultValue float64) float64 {
 	if s, ok := os.LookupEnv(key); ok {
 		if commaDecimalSeparator {
@@ -79,6 +95,7 @@ func F64(key string, commaDecimalSeparator bool, defaultValue float64) float64 {
 }
 
 // Float64 returns the env var value as float64
+// It returns the default value only if either the variable is not present or if its value cannot be correctly converted for float64
 // It's an idiomatic convenience alias for F64
 func Float64(key string, commaDecimalSeparator bool, defaultValue float64) float64 {
 	return F64(key, commaDecimalSeparator, defaultValue)
@@ -87,6 +104,10 @@ func Float64(key string, commaDecimalSeparator bool, defaultValue float64) float
 // StringS returns the env var value as []string
 func StringS(key, separator string, defaultValue []string) []string {
 	if s, ok := os.LookupEnv(key); ok {
+		if s == "" {
+			return []string{}
+		}
+
 		return strings.Split(s, separator)
 	}
 
