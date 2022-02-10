@@ -15,13 +15,9 @@ func IsThere(key string) bool {
 	return ok
 }
 
-// Get returns the env var value as string
-func Get(key string, defaultValue string) string {
-	if s, ok := os.LookupEnv(key); ok {
-		return s
-	}
-
-	return defaultValue
+// Get returns the env var value as string, or empty if the variable is not present
+func Get(key string) string {
+	return os.Getenv(key)
 }
 
 // String returns the env var value as string
